@@ -1,0 +1,30 @@
+---
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: update repository index
+    yum:
+      update_cache: yes
+
+  - name: Open port 80 for http access
+    firewalld:
+      service: http
+      permanent: true
+      state: enabled
+
+  - name: Restart the firewalld service to load in the firewall changes
+    service: 
+      name: firewalld 
+      state: restarted
+
+  - name: install apache2 package
+    yum:
+      name: httpd
+      state: absent
+
+  - name: Install php support for apache
+    yum:
+      name: php
+      state: absent
