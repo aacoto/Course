@@ -1,0 +1,50 @@
+- name: enable http access 
+  firewalld:
+    service: http
+    permanent: true
+    state: enabled
+
+- name: add port 80 to firewalld
+  firewalld:
+    port: 80/tcp
+    state: enabled
+
+- name: Restart the firewalld service to load in the firewall changes
+  service: 
+    name: firewalld 
+    state: restarted
+
+- name: install apache2 and php for ubuntu servers
+  tags: apache,apache2,ubuntu
+  apt:
+    name: 
+      - apache2
+      - libapache2-mod-php
+    state: latest
+  when: ansible_distribution == "Ubuntu"
+
+- name: install apache and php for CentOs
+  tags: apache,CentOs,httpd
+  yum:
+    name: 
+      - httpd
+      - php
+    state: latest
+  when: ansible_distribution == "AlmaLinux"
+
+- name: start httpd (CentOs)
+  tags: apache,CentOs,httpd
+  service:
+    name: httpd
+    state: restarted
+    enabled: yes
+  when: ansible_distribution == "AlmaLinux"
+
+- name: copy default html file for our site
+  tags: apache,apache2,httpd
+  copy:
+    src: default_site.html
+    dest: /var/www/html/index.html
+    owner: root
+    group: root
+    mode: 0644 
