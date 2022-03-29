@@ -2,6 +2,24 @@
 
 - hosts: all
   become: true
+  pre_tasks:
+
+  - name: install updates (CentOs)
+    tags: always
+    yum:
+      update_only: yes
+      update_cache: yes
+    when: ansible_distribution == "AlmaLinux"
+
+  - name: install updates (Ubuntu)
+    tags: always
+    apt:
+      upgrade: dist
+      update_cache: yes
+    when: ansible_distribution == "Ubuntu"
+
+- hosts: web_servers
+  become: true
   tasks:
     
   - name: Open port 80 for http access 
@@ -16,19 +34,19 @@
       state: restarted
 
   - name: install apache2 and php for ubuntu servers
+    tags: apache, apache2, ubuntu
     apt:
       name: 
         - apache2
         - libapache2-mod-php
       state: latest
-      update_cache: yes
-    when: ansible-distribution == "Ubuntu"
+    when: ansible_distribution == "Ubuntu"
 
   - name: install apache and php for CentOs
+    tags: apache, CentOs, httpd
     yum:
       name: 
         - httpd
         - php
       state: latest
-      update_cache: yes
-    when: ansible-distribution == "AlmaLinux"
+    when: ansible_distribution == "AlmaLinux"
