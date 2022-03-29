@@ -7,16 +7,28 @@
   - name: install updates (CentOs)
     tags: always
     yum:
-      update_only: yes
-      update_cache: yes
+      update_cache: yes 
+    change_when: false
     when: ansible_distribution == "AlmaLinux"
 
   - name: install updates (Ubuntu)
     tags: always
     apt:
-      upgrade: dist
-      update_cache: yes
+      update_cache: yes 
+    change_when: false
     when: ansible_distribution == "Ubuntu"
+
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: add ssh key for simone
+    tags: always
+    authorized_key:
+      user: simone
+      key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEdB12l5PWzK9yxPvKh7QeGtjS8gVmBoYBQh6fdyZIWF ansible key"
+
 
 - hosts: web_servers
   become: true
@@ -56,6 +68,14 @@
       state: latest
     when: ansible_distribution == "AlmaLinux"
 
+  - name: start httpd (CentOs)
+    tags: apache,CentOs,httpd
+    service:
+      name: httpd
+      state: restarted
+      enabled: yes
+    when: ansible_distribution == "AlmaLinux"
+
   - name: copy default html file for our site
     tags: apache,apache2,httpd
     copy:
@@ -63,5 +83,4 @@
       dest: /var/www/html/index.html
       owner: root
       group: root
-      mode: 0644
-
+      mode: 0644 
